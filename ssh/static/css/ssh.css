@@ -1,0 +1,9 @@
+/* CSS for SshXBlock */
+
+.ssh_block .count {
+    font-weight: bold;
+}
+
+.ssh_block p {
+    cursor: pointer;
+}
