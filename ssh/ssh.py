@@ -35,7 +35,9 @@ class SshXBlock(XBlock):
         html = self.resource_string("static/html/ssh.html")
         frag = Fragment(html.format(self=self))
         frag.add_css(self.resource_string("static/css/ssh.css"))
-        frag.add_javascript(self.resource_string("static/js/src/ssh.js"))
+        frag.add_css(self.resource_string("static/css/jqueryterm.css"))
+        frag.add_javascript(self.resource_string("static/js/ssh.js"))
+        frag.add_javascript(self.resource_string("static/js/jqueryterm.js"))
         frag.initialize_js('SshXBlock')
         return frag
 
@@ -48,9 +50,15 @@ class SshXBlock(XBlock):
         """
         # Just to show data coming in...
         assert data['hello'] == 'world'
-
+        print 'hi'
         self.count += 1
         return {"count": self.count}
+
+    @XBlock.json_handler
+    def process_command(self, data, suffix=''):
+        print 'received command ', data['cmd']
+        print 'returning ...'
+        return {}
 
     # TO-DO: change this to create the scenarios you'd like to see in the
     # workbench while developing your XBlock.
@@ -60,8 +68,6 @@ class SshXBlock(XBlock):
         return [
             ("SshXBlock",
              """<vertical_demo>
-                <ssh/>
-                <ssh/>
                 <ssh/>
                 </vertical_demo>
              """),
