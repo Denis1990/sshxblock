@@ -1,15 +1,15 @@
-"""TO-DO: Write a description of what this XBlock is."""
+"""This XBlock is web base ssh terminal."""
 
 import pkg_resources
 
 from xblock.core import XBlock
-from xblock.fields import Scope, Integer
+from xblock.fields import Scope, Integer, String
 from xblock.fragment import Fragment
 
 
 class SshXBlock(XBlock):
     """
-    TO-DO: document what your XBlock does.
+    Make an ssh connection with a remote machine.
     """
 
     # Fields are defined on the class.  You can access them in your code as
@@ -20,6 +20,9 @@ class SshXBlock(XBlock):
         default=0, scope=Scope.user_state,
         help="A simple counter, to show something happening",
     )
+
+    host_name = String(default='', scope=Scope.user_state, help="The hostname of the machine to connect to")
+    host_ip = String(default='', scope=Scope.user_state, help="The hosts ip address")
 
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
@@ -58,7 +61,7 @@ class SshXBlock(XBlock):
     def process_command(self, data, suffix=''):
         print 'received command ', data['cmd']
         print 'returning ...'
-        return {}
+        return {'response': ['.', '..']}
 
     # TO-DO: change this to create the scenarios you'd like to see in the
     # workbench while developing your XBlock.
@@ -71,4 +74,4 @@ class SshXBlock(XBlock):
                 <ssh/>
                 </vertical_demo>
              """),
-        ]
+            ]

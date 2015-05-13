@@ -1,7 +1,19 @@
 <div class="ssh_block">
-    <p>SshXBlock: count is now
+    <p>
+        SshXBlock: count is now
         <span class='count'>{self.count}</span> (click me to increment).
     </p>
+    <div>
+        <form method="post" action="{% url %}"
+        <label>
+            Enter username:
+        </label>
+        <input id="usernameTxt" type="text"/>
+        <label>
+            Enter password:
+        </label>
+        <input id="passwordTxt" type="text"/>
+    </div>
     <div id="termDiv" class="terminal" style="height: 400px;">
     </div>
 </div>
