@@ -1,2 +1,2 @@
-paramiko==dev
+paramiko==1.9.0
 -e .
