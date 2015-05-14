@@ -1,4 +1,4 @@
-"""This XBlock is web base ssh terminal."""
+﻿"""This XBlock is web base ssh terminal."""
 
 import pkg_resources
 
@@ -53,7 +53,9 @@ class SshXBlock(XBlock):
         """
         # Just to show data coming in...
         assert data['hello'] == 'world'
-        print 'hi'
+        print "-----------"
+        print "Count is %i" % (self.count)
+        print "-----------"
         self.count += 1
         return {"count": self.count}
 
