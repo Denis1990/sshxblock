@@ -3,6 +3,7 @@
 *.xml
 
 *.db
+*.db.*
 *.log
 ### VirtualEnv template
 # Virtualenv
