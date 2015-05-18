@@ -3,7 +3,8 @@
 *.xml
 
 *.db
-*.db.*
+*.db.[1-9]
+workbench.*
 *.log
 ### VirtualEnv template
 # Virtualenv
