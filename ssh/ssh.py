@@ -1,6 +1,7 @@
-"""This XBlock is web base ssh terminal."""
+﻿"""This XBlock is web base ssh terminal."""
 
 import pkg_resources
+import paramiko
 
 from xblock.core import XBlock
 from xblock.fields import Scope, Integer, String
@@ -23,7 +24,11 @@ class SshXBlock(XBlock):
 
     host_name = String(default='', scope=Scope.user_state, help="The hostname of the machine to connect to")
     host_ip = String(default='', scope=Scope.user_state, help="The hosts ip address")
-
+    ssh_host = String(default='', scope=Scope.user_state, help="The hosts ip address or name")
+    ssh_user = String(default='', scope=Scope.user_state, help="The username for ssh connection")
+    ssh_pass = String(default='', scope=Scope.user_state, help="The password for ssh connection")
+    ssh_port = Integer(default=22, scope=Scope.user_state, help="The port for ssh connection")
+    
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
         data = pkg_resources.resource_string(__name__, path)
@@ -53,7 +58,7 @@ class SshXBlock(XBlock):
         """
         # Just to show data coming in...
         assert data['hello'] == 'world'
-        print 'hi'
+        print "incread"
         self.count += 1
         return {"count": self.count}
 
@@ -62,7 +67,39 @@ class SshXBlock(XBlock):
         print 'received command ', data['cmd']
         print 'returning ...'
         return {'response': ['.', '..']}
-
+    
+    # TO-DO: exceptions dont work well with some cases :eg Uknown host
+    # Need to make safe ssh with keys 
+    # Need to be done with jqueryterm and not text fields    
+    @XBlock.json_handler
+    def authorize(self, data, suffix=''):
+        print "--------------------------"
+        print "Host = " , data['host'];
+        print "Username = " , data['user'];
+        print "Password = " , data['pass'];
+        """print "Port = " , data['port'];"""
+        print "--------------------------"
+        self.ssh_host = data['host'];
+        self.ssh_user = data['user'];
+        self.ssh_pass = data['pass'];
+        """self.ssh_port = data['port'];"""
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy());
+        try:
+             ssh.connect(self.ssh_host,port=22,username=self.ssh_user,password=self.ssh_pass)     
+        except paramiko.SSHException:
+               print "Connection Failed"
+               ssh.close()
+               """"quit()"""
+               return {'autho':"Not connected"}
+        """This commands needs to be given by the terminal"""       
+        stdin,stdout,stderr = ssh.exec_command("ls")
+        for line in stdout.readlines():
+                 print line.strip()
+        ssh.close()       
+        return {'autho': "Connected"}
+    
+        
     # TO-DO: change this to create the scenarios you'd like to see in the
     # workbench while developing your XBlock.
     @staticmethod

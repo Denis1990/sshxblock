@@ -5,9 +5,14 @@ function SshXBlock(runtime, element) {
         $('.count', element).text(result.count);
     }
 
+    function done(result) {
+        alert(result.autho);
+    }
+    
     var handlerUrl = runtime.handlerUrl(element, 'increment_count');
     var sshCmd = runtime.handlerUrl(element, 'process_command');
-
+    var authorizeUrl = runtime.handlerUrl(element, 'authorize');
+    
     $('p', element).click(function(eventObject) {
         $.ajax({
             type: "POST",
@@ -42,4 +47,22 @@ function SshXBlock(runtime, element) {
                 }
             }
         });
+       
+       //Function to make ssh connect with ssh.py  authorize function
+       $('#btncon', element).click(function(eventObject) {
+               var host =  $("#hostTxt").val();
+               var user =  $("#usernameTxt").val();
+               var pass = $("#passwordTxt").val();
+            //   var port = $("#portTxt").val();
+               console.log("Host = "+host+"\nUsername = "+user+"\nPassword ="+pass);
+         $.ajax({
+            type: "POST",
+            url: authorizeUrl,
+            data: JSON.stringify({"host":host,"user": user,"pass": pass}),
+            success: done
+        });
+    });
+       
+       
+       
 }
