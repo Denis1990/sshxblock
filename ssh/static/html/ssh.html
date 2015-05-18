@@ -3,17 +3,23 @@
         SshXBlock: count is now
         <span class='count'>{self.count}</span> (click me to increment).
     </p>
-    <div>
-        <label>
-            Enter username:
-        </label>
-        <input name="usernameTxt"  id="usernameTxt" type="text"/>
-        <label>
-            Enter password:
-        </label>
-        <input name="passwordTxt" id="passwordTxt" type="text"/>
-		<input type="button" name="connect" id="connect" value="connect">
-    </div>
+    <table border="1" style="text-align:center;">
+    <tr>
+        <td>Enter host:</td>
+      <!--  <td>Enter port:</td>   not used yet -->
+        <td>Enter username:</td>
+        <td>Enter password:</td>
+    </tr>
+    <tr>
+       <td> <input name="hostTxt"  id="hostTxt" type="text"/></td>
+      <!--    <td><input name="portTxt" id="portTxt" type="text"/></td> not used yet -->
+        <td> <input name="usernameTxt"  id="usernameTxt" type="text"/></td>
+        <td><input name="passwordTxt" id="passwordTxt" type="text"/></td>
+    </tr>
+    <tr>
+        <td colspan="4" ><input type="button" id="btncon" name="btncon" value="connect"</td>
+    <tr>
+    </table>
     <div id="termDiv" class="terminal" style="height: 400px;">
     </div>
 </div>
