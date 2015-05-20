@@ -1,27 +1,20 @@
 /* Javascript for SshXBlock. */
 function SshXBlock(runtime, element) {
 
-    function updateCount(result) {
-        $('.count', element).text(result.count);
+    /**
+     * This function is responsible for printing
+     * the output of a command passed to server.
+     */
+    function printCommandOutput(result) {
     }
 
     function done(result) {
         alert(result.autho);
     }
     
-    var handlerUrl = runtime.handlerUrl(element, 'increment_count');
     var sshCmd = runtime.handlerUrl(element, 'process_command');
     var authorizeUrl = runtime.handlerUrl(element, 'authorize');
     
-    $('p', element).click(function(eventObject) {
-        $.ajax({
-            type: "POST",
-            url: handlerUrl,
-            data: JSON.stringify({"hello": "world"}),
-            success: updateCount
-        });
-    });
-
     $('#termDiv').terminal(
         function(command, term) {
             if (command == 'test') {
@@ -39,10 +32,7 @@ function SshXBlock(runtime, element) {
                         type: "POST",
                         url: sshCmd,
                         data: JSON.stringify({"cmd": term.get_command()}),
-                        success: function() {
-                            term.echo('.\n..\nDocuments\n');
-                            return true;
-                        }
+                        success: printCommandOutput
                     });
                 }
             }
@@ -50,17 +40,13 @@ function SshXBlock(runtime, element) {
        
        //Function to make ssh connect with ssh.py  authorize function
        $('#btncon', element).click(function(eventObject) {
-               var host =  $("#hostTxt").val();
-               var user =  $("#usernameTxt").val();
-               var pass = $("#passwordTxt").val();
             //   var port = $("#portTxt").val();
-               console.log("Host = "+host+"\nUsername = "+user+"\nPassword ="+pass);
-         $.ajax({
-            type: "POST",
-            url: authorizeUrl,
-            data: JSON.stringify({"host":host,"user": user,"pass": pass}),
-            success: done
-        });
+            $.ajax({
+                type: "POST",
+                url: authorizeUrl,
+                data: JSON.stringify({"host":$("#hostTxt").val(), "user": $("#usernameTxt").val(), "pass": $("#passwordTxt").val()}),
+                success: done
+            });
     });
        
        
