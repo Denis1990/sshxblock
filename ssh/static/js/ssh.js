@@ -6,6 +6,7 @@ function SshXBlock(runtime, element) {
      * the output of a command passed to server.
      */
     function printCommandOutput(result) {
+        termObj.echo(JSON.parse(result)['response'])
     }
 
     function done(result) {
@@ -14,13 +15,10 @@ function SshXBlock(runtime, element) {
     
     var sshCmd = runtime.handlerUrl(element, 'process_command');
     var authorizeUrl = runtime.handlerUrl(element, 'authorize');
-    
-    $('#termDiv').terminal(
-        function(command, term) {
-            if (command == 'test') {
-                term.echo("you just typed 'test'");
-            }
-        }, {
+    var termObj = $('#termDiv').terminal(
+                function(command, term) {
+                 
+                }, {
             prompt: '>',
             name: 'test',
             enabled: true,

@@ -2,6 +2,7 @@
 
 import pkg_resources
 import paramiko
+import json
 
 from xblock.core import XBlock
 from xblock.fields import Scope, Integer, String
@@ -16,8 +17,6 @@ class SshXBlock(XBlock):
     # Fields are defined on the class.  You can access them in your code as
     # self.<fieldname>.
 
-    host_name = String(default='', scope=Scope.user_state, help="The hostname of the machine to connect to")
-    host_ip = String(default='', scope=Scope.user_state, help="The hosts ip address")
     ssh_host = String(default='', scope=Scope.user_state, help="The hosts ip address or name")
     ssh_user = String(default='', scope=Scope.user_state, help="The username for ssh connection")
     ssh_pass = String(default='', scope=Scope.user_state, help="The password for ssh connection")
@@ -45,30 +44,20 @@ class SshXBlock(XBlock):
 
     # TO-DO: change this handler to perform your own actions.  You may need more
     # than one handler, or you may not need any handlers at all.
-    @XBlock.json_handler
-    def increment_count(self, data, suffix=''):
-        """
-        An example handler, which increments the data.
-        """
-        # Just to show data coming in...
-        assert data['hello'] == 'world'
-        print "incread"
-        self.count += 1
-        return {"count": self.count}
 
     @XBlock.json_handler
     def process_command(self, data, suffix=''):
-        if self.ssh_connection != None:
-            self.channel = self.ssh_connection.invoke_shell()
-            buff = ''
-            self.chan.send(data['cmd'])
-            while not self.channel.recv_ready():
-                continue
-            command_output = self.channel.recv()
-            return {'response', command_output}
-        print 'return null'
-        command_output = None
-        return {'response': command_output}
+        ssh_connection = paramiko.SSHClient()
+        ssh_connection.set_missing_host_key_policy(paramiko.client.AutoAddPolicy())
+        try:
+            ssh_connection.connect(hostname=self.ssh_host, port=9022, username=self.ssh_user, password=self.ssh_pass)
+            stdin, stdout, stderr = ssh_connection.exec_command(data['cmd'])
+            return json.dumps({'response': stdout.readlines()})
+        except Exception:
+            print "Connection Failed"
+            ssh_connection.close()
+            return {'autho':"Not connected"}
+        return {'response': None}
 
     # TO-DO: exceptions dont work well with some cases :eg Uknown host
     # Need to make safe ssh with keys 
@@ -82,7 +71,6 @@ class SshXBlock(XBlock):
         self.ssh_connection.set_missing_host_key_policy(paramiko.client.AutoAddPolicy());
         try:
             self.ssh_connection.connect(hostname=self.ssh_host,port=9022,username=self.ssh_user,password=self.ssh_pass)
-            self.vari = 98
         except paramiko.SSHException:
             print "Connection Failed"
             self.ssh_connection.close()
