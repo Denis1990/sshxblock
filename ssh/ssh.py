@@ -21,7 +21,8 @@ class SshXBlock(XBlock):
     ssh_user = String(default='', scope=Scope.user_state, help="The username for ssh connection")
     ssh_pass = String(default='', scope=Scope.user_state, help="The password for ssh connection")
     ssh_port = Integer(default=22, scope=Scope.user_state, help="The port for ssh connection")
-    
+    ssh_pwd = String(default='~', scope=Scope.user_state, help="With cd command the path you were before is stored here")
+  
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
         data = pkg_resources.resource_string(__name__, path)
@@ -44,14 +45,27 @@ class SshXBlock(XBlock):
 
     # TO-DO: change this handler to perform your own actions.  You may need more
     # than one handler, or you may not need any handlers at all.
-
     @XBlock.json_handler
     def process_command(self, data, suffix=''):
         ssh_connection = paramiko.SSHClient()
         ssh_connection.set_missing_host_key_policy(paramiko.client.AutoAddPolicy())
         try:
-            ssh_connection.connect(hostname=self.ssh_host, port=9022, username=self.ssh_user, password=self.ssh_pass)
-            stdin, stdout, stderr = ssh_connection.exec_command(data['cmd'])
+            port_num = int(self.ssh_port)
+            ssh_connection.connect(hostname=self.ssh_host, port=port_num, username=self.ssh_user, password=self.ssh_pass)
+            print "----------------" 
+            stdin, stdout, stderr = ssh_connection.exec_command('cd '+self.ssh_pwd)    
+            test = data['cmd']      
+            print test.split() 
+            if test[0:3]=='cd ':
+               """
+               It seems that each exec_command is a seperate session so we have to run all commands combined
+               http://www.vertigrated.com/blog/2010/02/python-remote-ssh-with-paramiko/
+               http://stackoverflow.com/questions/8932862/how-do-i-change-directories-using-paramiko
+               """
+               stdin, stdout, stderr = ssh_connection.exec_command('cd ' + self.ssh_pwd+ ';' +'cd ' +test[3:]+";pwd | tr -d '\n'")   
+               self.ssh_pwd = stdout.readline()
+               print self.ssh_pwd               
+            stdin, stdout, stderr = ssh_connection.exec_command('cd ' + self.ssh_pwd+ ';' + data['cmd'])
             return json.dumps({'response': stdout.readlines()})
         except Exception:
             print "Connection Failed"
@@ -65,17 +79,23 @@ class SshXBlock(XBlock):
     @XBlock.json_handler
     def authorize(self, data, suffix=''):
         self.ssh_host = data['host'];
+        self.ssh_port = data['port'];
         self.ssh_user = data['user'];
         self.ssh_pass = data['pass'];
+        """"
+        Because port is type <unicode> and not Integer and create a variable portnum for port which is int
+        """
+        port_num = int(self.ssh_port)
         self.ssh_connection = paramiko.SSHClient()
         self.ssh_connection.set_missing_host_key_policy(paramiko.client.AutoAddPolicy());
         try:
-            self.ssh_connection.connect(hostname=self.ssh_host,port=9022,username=self.ssh_user,password=self.ssh_pass)
+            self.ssh_connection.connect(hostname=self.ssh_host,port=port_num,username=self.ssh_user,password=self.ssh_pass)
         except paramiko.SSHException:
             print "Connection Failed"
             self.ssh_connection.close()
             """"quit()"""
             return {'autho':"Not connected"}
+        self.ssh_pwd   = "~"
         return {'autho': "Connected"}
 
     def logout(self):

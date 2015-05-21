@@ -38,11 +38,10 @@ function SshXBlock(runtime, element) {
        
        //Function to make ssh connect with ssh.py  authorize function
        $('#btncon', element).click(function(eventObject) {
-            //   var port = $("#portTxt").val();
             $.ajax({
                 type: "POST",
                 url: authorizeUrl,
-                data: JSON.stringify({"host":$("#hostTxt").val(), "user": $("#usernameTxt").val(), "pass": $("#passwordTxt").val()}),
+                data: JSON.stringify({"host":$("#hostTxt").val(),"port":$("#portTxt").val(), "user": $("#usernameTxt").val(), "pass": $("#passwordTxt").val()}),
                 success: done
             });
     });
