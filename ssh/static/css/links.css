@@ -1,0 +1,9 @@
+/* CSS for LinksXBlock */
+
+.links_block .count {
+    font-weight: bold;
+}
+
+.links_block p {
+    cursor: pointer;
+}

@@ -1,6 +1,6 @@
 /* Javascript for SshXBlock. */
 function SshXBlock(runtime, element) {
-
+    
     /**
      * This function is responsible for printing
      * the output of a command passed to server.

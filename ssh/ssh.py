@@ -10,24 +10,42 @@ from xblock.fragment import Fragment
 
 
 class SshXBlock(XBlock):
+    
     """
     Make an ssh connection with a remote machine.
     """
 
     # Fields are defined on the class.  You can access them in your code as
     # self.<fieldname>.
-
+   
     ssh_host = String(default='', scope=Scope.user_state, help="The hosts ip address or name")
     ssh_user = String(default='', scope=Scope.user_state, help="The username for ssh connection")
     ssh_pass = String(default='', scope=Scope.user_state, help="The password for ssh connection")
     ssh_port = Integer(default=22, scope=Scope.user_state, help="The port for ssh connection")
     ssh_pwd = String(default='~', scope=Scope.user_state, help="With cd command the path you were before is stored here")
-  
+    
+    
+    """"
+    def studio_view(self, context=None):
+        html = self.resource_string("static/html/ssh_edit.html")
+        frag = Fragment(html.format(self=self))
+        frag.add_javascript(self.resource_string("static/js/src/ssh_edit.js"))
+        frag.initialize_js('SshEditXBlock')
+        return frag
+    """
+
+    def studio_view(self, context):
+        html = self.resource_string("static/html/ssh_edit.html")
+        frag = Fragment(html.format(self=self))
+        frag.add_javascript(self.resource_string("static/js/ssh_edit.js"))
+        frag.initialize_js('SshEditXBlock')
+        return frag
+    
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
         data = pkg_resources.resource_string(__name__, path)
-        return data.decode("utf8")
-
+        return data.decode("utf8")    
+        
     # TO-DO: change this view to display your data your own way.
     def student_view(self, context=None):
         """
@@ -86,16 +104,17 @@ class SshXBlock(XBlock):
         Because port is type <unicode> and not Integer and create a variable portnum for port which is int
         """
         port_num = int(self.ssh_port)
-        self.ssh_connection = paramiko.SSHClient()
-        self.ssh_connection.set_missing_host_key_policy(paramiko.client.AutoAddPolicy());
+        ssh_connection = paramiko.SSHClient()
+        ssh_connection.set_missing_host_key_policy(paramiko.client.AutoAddPolicy());
         try:
-            self.ssh_connection.connect(hostname=self.ssh_host,port=port_num,username=self.ssh_user,password=self.ssh_pass)
+            ssh_connection.connect(hostname=self.ssh_host,port=port_num,username=self.ssh_user,password=self.ssh_pass)
+            stdin, stdout, stderr = ssh_connection.exec_command("cd ~ ;pwd | tr -d '\n'") 
+            self.ssh_pwd = stdout.readline()       
         except paramiko.SSHException:
             print "Connection Failed"
             self.ssh_connection.close()
             """"quit()"""
             return {'autho':"Not connected"}
-        self.ssh_pwd   = "~"
         return {'autho': "Connected"}
 
     def logout(self):
@@ -108,9 +127,13 @@ class SshXBlock(XBlock):
     def workbench_scenarios():
         """A canned scenario for display in the workbench."""
         return [
-            ("SshXBlock",
-             """<vertical_demo>
-                <ssh/>
-                </vertical_demo>
-             """),
+            ("SshXBlock","""<ssh/>"""),
             ]
+
+            
+    @XBlock.json_handler
+    def studio_submit(self, data, suffix=''):
+        return {
+            'result': 'success',
+        }
+	        
