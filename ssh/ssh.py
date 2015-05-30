@@ -5,7 +5,7 @@ import paramiko
 import json
 
 from xblock.core import XBlock
-from xblock.fields import Scope, Integer, String
+from xblock.fields import Scope, Integer, String , List
 from xblock.fragment import Fragment
 
 
@@ -23,24 +23,30 @@ class SshXBlock(XBlock):
     ssh_pass = String(default='', scope=Scope.user_state, help="The password for ssh connection")
     ssh_port = Integer(default=22, scope=Scope.user_state, help="The port for ssh connection")
     ssh_pwd = String(default='~', scope=Scope.user_state, help="With cd command the path you were before is stored here")
-    
-    
-    """"
-    def studio_view(self, context=None):
-        html = self.resource_string("static/html/ssh_edit.html")
-        frag = Fragment(html.format(self=self))
-        frag.add_javascript(self.resource_string("static/js/src/ssh_edit.js"))
-        frag.initialize_js('SshEditXBlock')
-        return frag
-    """
+    ssh_noHosts = Integer(default=0, scope=Scope.user_state, help="Number of valid hostnames")
+    ssh_hostnames = List(scope=Scope.user_state ,help="Editable property for studio version,defining machines to connect to.Field format :[hostname1,hostname2]")
+    ssh_profiles = List(scope=Scope.user_state ,help="Editable property for studio version,defining login profiles for machines.Field format :[  [ [host1_user1,host1_user2] ,[host1_pass1,host1_pass2] ]  , [[..],[..]] <--host 2....]")
+     
 
     def studio_view(self, context):
+        """temporary for debug number of hosts=0"""
+        self.ssh_noHosts = 0 
         html = self.resource_string("static/html/ssh_edit.html")
         frag = Fragment(html.format(self=self))
         frag.add_javascript(self.resource_string("static/js/ssh_edit.js"))
         frag.initialize_js('SshEditXBlock')
         return frag
     
+    """Studio view uses this to add new host machine""" 
+    @XBlock.json_handler
+    def addHost(self,data, suffix=''):
+        new_host = data['new_machine']
+        print new_host
+        self.ssh_noHosts += 1  
+        self.ssh_hostnames.append(new_host)         
+        return {'id':self.ssh_noHosts,'host': new_host}
+        
+        
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
         data = pkg_resources.resource_string(__name__, path)
@@ -70,7 +76,6 @@ class SshXBlock(XBlock):
         try:
             port_num = int(self.ssh_port)
             ssh_connection.connect(hostname=self.ssh_host, port=port_num, username=self.ssh_user, password=self.ssh_pass)
-            print "----------------" 
             stdin, stdout, stderr = ssh_connection.exec_command('cd '+self.ssh_pwd)    
             test = data['cmd']      
             print test.split() 
@@ -136,4 +141,11 @@ class SshXBlock(XBlock):
         return {
             'result': 'success',
         }
-	        
+    """	     
+    Add[>Give machine]
+    [noneV][delete]
+    Set username and pass for machine [ ]
+    []
+    """
+
+         
