@@ -1,14 +1,15 @@
-<div class="ssh_block" style="overflow-x:hidden;overflow-y:auto;height:100px;width:500px;">
+<center>    
     <div id="input-machine">
         <span>Host</span><input type="text" id="new-machine" placeholder="Give IP or Hostname">
         <input type="button" id="new-host-button" value="add"> 
     </div>
+<div class="ssh_block" style="overflow-x:hidden;overflow-y:auto;height:100px;width:500px;">
     <div id="machine-names">
-       <table border=1 id="hosts-table">
+       <table border=1 id="hosts-table" name="hosts-table">
         <thead>
             <tr>
                 <th scope="col" title="ID">ID</th>
-                <th scope="col">HOSTNAME</th>
+                <th scope="col" colspan="2">HOSTNAME</th>
             </tr>
         </thead>
         <tbody>
@@ -19,5 +20,5 @@
         </table>        
     </div>
 </div>
-
+</center>
 <!--https://sunnywalker.github.io/jQuery.FilterTable/ -->

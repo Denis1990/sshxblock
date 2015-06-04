@@ -23,28 +23,42 @@ class SshXBlock(XBlock):
     ssh_pass = String(default='', scope=Scope.user_state, help="The password for ssh connection")
     ssh_port = Integer(default=22, scope=Scope.user_state, help="The port for ssh connection")
     ssh_pwd = String(default='~', scope=Scope.user_state, help="With cd command the path you were before is stored here")
-    ssh_noHosts = Integer(default=0, scope=Scope.user_state, help="Number of valid hostnames")
     ssh_hostnames = List(scope=Scope.user_state ,help="Editable property for studio version,defining machines to connect to.Field format :[hostname1,hostname2]")
     ssh_profiles = List(scope=Scope.user_state ,help="Editable property for studio version,defining login profiles for machines.Field format :[  [ [host1_user1,host1_user2] ,[host1_pass1,host1_pass2] ]  , [[..],[..]] <--host 2....]")
      
 
     def studio_view(self, context):
         """temporary for debug number of hosts=0"""
-        self.ssh_noHosts = 0 
+        print "------------------"
+        for x in self.ssh_hostnames:
+            print x
+        print "------------------"    
         html = self.resource_string("static/html/ssh_edit.html")
         frag = Fragment(html.format(self=self))
         frag.add_javascript(self.resource_string("static/js/ssh_edit.js"))
         frag.initialize_js('SshEditXBlock')
         return frag
     
+    """Studio view uses this to remove a host machine by id """
+    @XBlock.json_handler    
+    def removeHost(self,data,suffix=''):
+        host_id = int(data['host_id'])
+        self.ssh_hostnames.pop(host_id)
+        return {}
+    
+    
+    """Studio view uses this to get all host machines """
+    @XBlock.json_handler    
+    def getHost(self,data,suffix=''):
+        return json.dumps({'hosts': self.ssh_hostnames})
+         
+        
     """Studio view uses this to add new host machine""" 
     @XBlock.json_handler
     def addHost(self,data, suffix=''):
         new_host = data['new_machine']
-        print new_host
-        self.ssh_noHosts += 1  
         self.ssh_hostnames.append(new_host)         
-        return {'id':self.ssh_noHosts,'host': new_host}
+        return {}
         
         
     def resource_string(self, path):
@@ -141,11 +155,4 @@ class SshXBlock(XBlock):
         return {
             'result': 'success',
         }
-    """	     
-    Add[>Give machine]
-    [noneV][delete]
-    Set username and pass for machine [ ]
-    []
-    """
-
          
