@@ -3,22 +3,38 @@
         <span>Host</span><input type="text" id="new-machine" placeholder="Give IP or Hostname">
         <input type="button" id="new-host-button" value="add"> 
     </div>
-<div class="ssh_block" style="overflow-x:hidden;overflow-y:auto;height:100px;width:500px;">
-    <div id="machine-names">
-       <table border=1 id="hosts-table" name="hosts-table">
+<div id="machine-names"  style="overflow-x:hidden;overflow-y:auto;height:100px;width:500px;">
+       <table border="1" id="hosts-table" name="hosts-table">
         <thead>
             <tr>
                 <th scope="col" title="ID">ID</th>
-                <th scope="col" colspan="2">HOSTNAME</th>
+                <th scope="col" colspan="3">HOSTNAME</th>
             </tr>
         </thead>
         <tbody>
-           <tr>
-             <td>##</td><td>-----------------</td>
-           </tr>
         </tbody>
         </table>        
-    </div>
+</div>
+<div id="input-users">
+        <span>Username</span><input type="text" id="new-username" placeholder="Give username">
+        <span>Password</span><input type="text" id="new-password" placeholder="Give Password">
+        <input type="text" id="new-password-2" placeholder="Give Password again">
+        <input type="button" id="new-profile-button" value="add"> 
+</div>
+<div id="Profile-names" class="ssh_block" style="overflow-x:hidden;overflow-y:auto;height:100px;width:500px;">
+       <table border="1" id="profile-table" name="profile-table">
+        <thead>
+            <tr><th scope="col" colspan="4" id="select-host">NO HOST SELECTED</td></tr>
+            <tr>
+                <th scope="col" >ID</th>
+                <th scope="col" >Username</th>
+                <th scope="col" >Password</th>
+                <th scope="col" >Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+        </table>        
 </div>
 </center>
 <!--https://sunnywalker.github.io/jQuery.FilterTable/ -->

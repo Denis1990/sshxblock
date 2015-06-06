@@ -5,7 +5,7 @@ import paramiko
 import json
 
 from xblock.core import XBlock
-from xblock.fields import Scope, Integer, String , List
+from xblock.fields import Scope, Integer, String , List,Dict
 from xblock.fragment import Fragment
 
 
@@ -24,49 +24,15 @@ class SshXBlock(XBlock):
     ssh_port = Integer(default=22, scope=Scope.user_state, help="The port for ssh connection")
     ssh_pwd = String(default='~', scope=Scope.user_state, help="With cd command the path you were before is stored here")
     ssh_hostnames = List(scope=Scope.user_state ,help="Editable property for studio version,defining machines to connect to.Field format :[hostname1,hostname2]")
-    ssh_profiles = List(scope=Scope.user_state ,help="Editable property for studio version,defining login profiles for machines.Field format :[  [ [host1_user1,host1_user2] ,[host1_pass1,host1_pass2] ]  , [[..],[..]] <--host 2....]")
-     
-
-    def studio_view(self, context):
-        """temporary for debug number of hosts=0"""
-        print "------------------"
-        for x in self.ssh_hostnames:
-            print x
-        print "------------------"    
-        html = self.resource_string("static/html/ssh_edit.html")
-        frag = Fragment(html.format(self=self))
-        frag.add_javascript(self.resource_string("static/js/ssh_edit.js"))
-        frag.initialize_js('SshEditXBlock')
-        return frag
-    
-    """Studio view uses this to remove a host machine by id """
-    @XBlock.json_handler    
-    def removeHost(self,data,suffix=''):
-        host_id = int(data['host_id'])
-        self.ssh_hostnames.pop(host_id)
-        return {}
-    
-    
-    """Studio view uses this to get all host machines """
-    @XBlock.json_handler    
-    def getHost(self,data,suffix=''):
-        return json.dumps({'hosts': self.ssh_hostnames})
+    ssh_profiles = Dict(scope=Scope.user_state ,help="Editable property for studio version,defining login profiles for machines.Field format :")
          
-        
-    """Studio view uses this to add new host machine""" 
-    @XBlock.json_handler
-    def addHost(self,data, suffix=''):
-        new_host = data['new_machine']
-        self.ssh_hostnames.append(new_host)         
-        return {}
-        
         
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
         data = pkg_resources.resource_string(__name__, path)
         return data.decode("utf8")    
-        
-    # TO-DO: change this view to display your data your own way.
+    
+    #================student View========================    
     def student_view(self, context=None):
         """
         The primary view of the SshXBlock, shown to students
@@ -140,6 +106,68 @@ class SshXBlock(XBlock):
         self.channel.close()
         self.ssh_connection.close()
 
+    #================studio View========================
+    def studio_view(self, context):
+        """temporary for debug number of hosts=0"""
+        html = self.resource_string("static/html/ssh_edit.html")
+        frag = Fragment(html.format(self=self))
+        frag.add_javascript(self.resource_string("static/js/ssh_edit.js"))
+        frag.initialize_js('SshEditXBlock')
+        return frag
+    
+    #----------------------studio View-Hosts--------------
+    """Studio view uses this to add new host machine""" 
+    @XBlock.json_handler
+    def addHost(self,data, suffix=''):
+        new_host = data['new_machine']
+        self.ssh_hostnames.append(new_host)   
+        self.ssh_profiles.setdefault(new_host, [])
+        return {}
+    
+    """Studio view uses this to remove a host machine by id """
+    @XBlock.json_handler    
+    def removeHost(self,data,suffix=''):
+        print self.ssh_hostnames
+        host_id = int(data['host_id'])
+        print "------------------------"
+        removed_host = self.ssh_hostnames[host_id]
+        self.ssh_hostnames.pop(host_id)
+        self.ssh_profiles.pop(removed_host)
+        return {}
+    
+        """Studio view uses this to get all host machines """
+    @XBlock.json_handler    
+    def getHost(self,data,suffix=''):
+        return json.dumps({'hosts': self.ssh_hostnames})
+    
+    
+    #----------------------studio View-Profiles--------------
+    """Studio view uses this to add new profiles for a host""" 
+    @XBlock.json_handler
+    def addProfile(self,data, suffix=''):
+        selected_host  = data['selected_host']
+        new_user  = data['new_user']
+        new_pass  = data['new_pass']
+        self.ssh_profiles[selected_host].append([new_user,new_pass])
+        return {} 
+    
+    """Studio view uses this to remove a profile for a selected machine by id """
+    @XBlock.json_handler 
+    def removeProfile(self,data,suffix=''):
+        profile_id = int(data['profile_id'])
+        selected_host = data['selected_host']
+        self.ssh_profiles[selected_host].pop(profile_id)
+        return {}
+        
+    """Studio view uses this to get all profiles for a specific machine """
+    @XBlock.json_handler    
+    def getProfile(self,data,suffix=''):
+        selected = data['selectedHost']
+        return json.dumps({'profiles': self.ssh_profiles[selected]})
+               
+    #===================================================
+    
+            
     # TO-DO: change this to create the scenarios you'd like to see in the
     # workbench while developing your XBlock.
     @staticmethod
