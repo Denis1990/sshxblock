@@ -1,6 +1,7 @@
 <center>    
     <div id="input-machine">
         <span>Host</span><input type="text" id="new-machine" placeholder="Give IP or Hostname">
+        <span>Port</span><input type="number" id="new-port" placeholder="Give port">
         <input type="button" id="new-host-button" value="add"> 
     </div>
 <div id="machine-names"  style="overflow-x:hidden;overflow-y:auto;height:100px;width:500px;">
@@ -8,7 +9,9 @@
         <thead>
             <tr>
                 <th scope="col" title="ID">ID</th>
-                <th scope="col" colspan="3">HOSTNAME</th>
+                <th scope="col" >Hostname/IP</th>
+                <th scope="col" >Port</th>
+                <th scope="col" colspan="2">Actions</th>
             </tr>
         </thead>
         <tbody>

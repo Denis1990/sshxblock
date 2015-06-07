@@ -1,20 +1,27 @@
 <div class="ssh_block">
+    <datalist id="data-hosts"></datalist>
+    <datalist id="data-ports"></datalist>
+    <datalist id="data-users"></datalist>
     <table border="1" style="text-align:center;">
+    <thead>
+        <tr>
+        <th>Enter host</th>
+        <th>Enter port</th>   
+        <th>Enter username</th>
+        <th>Enter password</th>
+        <th colspan="2">Actions</th>
+        </tr>
+    </thead>
     <tr>
-        <td>Enter host:</td>
-        <td>Enter port:</td>   
-        <td>Enter username:</td>
-        <td>Enter password:</td>
+        <form id="clearForm">
+        <td> <input name="hostTxt"  id="hostTxt" type="text" list="data-hosts"  autocomplete="on"/></td>
+        <td><input name="portTxt" id="portTxt" type="text" list="data-ports"  autocomplete="on"/></td> 
+        <td> <input name="usernameTxt"  id="usernameTxt" type="text" list="data-users"  autocomplete="on"/></td>
+        <td><input name="passwordTxt" id="passwordTxt" type="password" /></td>
+        <td><input type="button" id="btncon" name="btncon" value="connect" ></td>
+        <td><input type="reset" value="clear" ></td>
+        </form>
     </tr>
-    <tr>
-       <td> <input name="hostTxt"  id="hostTxt" type="text"/></td>
-        <td><input name="portTxt" id="portTxt" type="number"/></td> 
-        <td> <input name="usernameTxt"  id="usernameTxt" type="text"/></td>
-        <td><input name="passwordTxt" id="passwordTxt" type="password"/></td>
-    </tr>
-    <tr>
-        <td colspan="4" ><input type="button" id="btncon" name="btncon" value="connect"</td>
-    <tr>
     </table>
     <div id="termDiv" class="terminal" style="height: 400px;">
     </div>

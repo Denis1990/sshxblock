@@ -1,5 +1,5 @@
 function SshEditXBlock(runtime, element) {
-     var selectedHost = null
+     var selectedHost = "NO HOST SELECTED"
      var addHostUrl = runtime.handlerUrl(element, 'addHost');
      var getHostUrl = runtime.handlerUrl(element, 'getHost');
      var removeHostUrl = runtime.handlerUrl(element, 'removeHost');
@@ -7,7 +7,11 @@ function SshEditXBlock(runtime, element) {
      var getProfileUrl = runtime.handlerUrl(element, 'getProfile');
      var removeProfileUrl = runtime.handlerUrl(element, 'removeProfile');
 
-
+//Regex to check if one or more spaces on start
+function check(item){return  /^[ ]+/.test(item)}     
+//Regex to check if a number(valid port 22 or 4digit number)
+function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}           
+     
 //============================HOST TABLE=============================
      
 //This function will be used each time the table is changed and on 
@@ -16,13 +20,42 @@ function SshEditXBlock(runtime, element) {
     function drawHostTable(result)
     {     
        $('#hosts-table').find("tr:gt(0)").remove();
-       var array  = JSON.parse(result)['hosts']
-       for (var i in array)       
-         $('#hosts-table').append('<tr><td>'+i+'</td><td>'+array[i]+'</td><td><input type="button" value="select"  ></td><td><input type="button" value="remove"  ></td></tr>');
+       var hosts  = JSON.parse(result)['hosts']
+       var ports = JSON.parse(result)['ports']
+       for (var i in hosts)       
+         $('#hosts-table').append('<tr><td>'+i+'</td><td>'+hosts[i]+'</td><td>'+ports[i]+'</td><td><input type="button" value="select"  ></td><td><input type="button" value="remove"  ></td></tr>');
+    }
+    
+         //Adding a new host    
+     $('#new-host-button', element).click(function(eventObject) {
+         new_machine = $("#new-machine").val()
+         new_port = $("#new-port").val()
+         if(!(check(new_machine) || new_machine==="" || new_port==="" || !checkNumber(new_port)))
+         {
+            $.ajax({
+                type: "POST",
+                url: addHostUrl,
+                data: JSON.
+                stringify({"new_machine":new_machine,"new_port":new_port}),
+                success: responseHost
+            }); 
+            $("#new-machine").val('')
+            $("#new-port").val('')
+         }
+         else alert("Please give a valid hostname/ip and port!!!")             
+    });
+    
+   //When we add a host we check if already exists 
+   function responseHost(result)
+    {
+      if (result.response=="false")
+         alert("Hostname already exists on the table")
+      else
+      getHost()     
     }
     
     //We created select buttons for each id on the host table this is the listener
-      $("#hosts-table").on("click", "tr td:nth-child(3)", function(event){
+      $("#hosts-table").on("click", "tr td:nth-child(4)", function(event){
          var tr = $(this).closest("tr")
          var col_hostname = $(tr).find('td:eq(1)').text()
          $('#select-host').html(col_hostname)  
@@ -32,7 +65,7 @@ function SshEditXBlock(runtime, element) {
      
      
      //We created remove buttons for each id on the host table this is the listener
-     $("#hosts-table").on("click", "tr td:nth-child(4)", function(event){
+     $("#hosts-table").on("click", "tr td:nth-child(5)", function(event){
          var tr = $(this).closest("tr")
          var col_id = $(tr).find('td:eq(0)').text()
           $.ajax({
@@ -42,6 +75,12 @@ function SshEditXBlock(runtime, element) {
                 stringify({"host_id":col_id}),
                 success: getHost
             });  
+         if($(tr).find('td:eq(1)').text()==selectedHost)
+         {
+             selectedHost = "NO HOST SELECTED" 
+             $('#select-host').html(selectedHost)  
+             $('#profile-table').find("tr:gt(1)").remove();
+         }
       });
      
      //We want to return all hosts from our db
@@ -94,26 +133,41 @@ function SshEditXBlock(runtime, element) {
             });  
     }
     
-     //Adding a new host    
-     $('#new-host-button', element).click(function(eventObject) {
-            $.ajax({
-                type: "POST",
-                url: addHostUrl,
-                data: JSON.
-                stringify({"new_machine":$("#new-machine").val()}),
-                success: getHost
-            });            
-    });
- 
+     //When we add a profile we check if already exists
+     function responseProfile(result)
+    {
+      if (result.response=="false")
+         alert("Username already exists on the table")
+      else
+      getProfile()     
+    }
+     
      //Adding a new profile
      $('#new-profile-button', element).click(function(eventObject) {
-            $.ajax({
-                type: "POST",
-                url: addProfileUrl,
-                data: JSON.
-                stringify({"new_user":$("#new-username").val(),"new_pass":$("#new-password").val(),"selected_host":$('#select-host').text()}),
-                success: getProfile
-            });            
+        new_user = $("#new-username").val()
+        new_pass = $("#new-password").val()
+        if(selectedHost!="NO HOST SELECTED")
+        {
+            if(!(check(new_user) || new_user==="" || check(new_pass) || new_pass=="" ))
+            {
+             if($("#new-password").val()==$("#new-password-2").val())
+             {                 
+                $.ajax({
+                    type: "POST",
+                    url: addProfileUrl,
+                    data: JSON.
+                    stringify({"new_user":new_user,"new_pass":new_pass,"selected_host":selectedHost}),
+                    success: responseProfile
+                }); 
+                $("#new-username").val('')
+                $("#new-password").val('')
+                $("#new-password-2").val('')  
+            }
+            else alert("Passwords not matching!!!!")            
+           }
+           else alert("Please fill the fields username and password with valid values!!!")
+        }
+        else alert("Please choose a Host first!!!")        
     });
     
 //==========================ON PAGE LOAD==================================

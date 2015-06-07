@@ -23,8 +23,9 @@ class SshXBlock(XBlock):
     ssh_pass = String(default='', scope=Scope.user_state, help="The password for ssh connection")
     ssh_port = Integer(default=22, scope=Scope.user_state, help="The port for ssh connection")
     ssh_pwd = String(default='~', scope=Scope.user_state, help="With cd command the path you were before is stored here")
-    ssh_hostnames = List(scope=Scope.user_state ,help="Editable property for studio version,defining machines to connect to.Field format :[hostname1,hostname2]")
-    ssh_profiles = Dict(scope=Scope.user_state ,help="Editable property for studio version,defining login profiles for machines.Field format :")
+    ssh_hostnames = List(scope=Scope.user_state ,help="Editable property for studio version,defining machines to connect to.Field format :[hostname1,hostname2,...]")
+    ssh_portList = List(scope=Scope.user_state ,help="Editable property for studio version,defining port to connect to.Field format :[hostname1-Port,hostname2-port,...]")
+    ssh_profiles = Dict(scope=Scope.user_state ,help="Editable property for studio version,defining login profiles for machines.Field format :[Hostname1:[[user1,pass1],[user2,pass2]],Hostname2:[[user1,pass2],[user2,pass2]]]")
          
         
     def resource_string(self, path):
@@ -45,6 +46,12 @@ class SshXBlock(XBlock):
         frag.add_javascript(self.resource_string("static/js/ssh.js"))
         frag.add_javascript(self.resource_string("static/js/jqueryterm.js"))
         frag.initialize_js('SshXBlock')
+        """These values will be reseted on each visit """
+        self.ssh_host = ''
+        self.ssh_user = ''
+        self.ssh_pass = ''
+        self.ssh_port = ''
+        self.ssh_pwd = ''
         return frag
 
     # TO-DO: change this handler to perform your own actions.  You may need more
@@ -58,7 +65,6 @@ class SshXBlock(XBlock):
             ssh_connection.connect(hostname=self.ssh_host, port=port_num, username=self.ssh_user, password=self.ssh_pass)
             stdin, stdout, stderr = ssh_connection.exec_command('cd '+self.ssh_pwd)    
             test = data['cmd']      
-            print test.split() 
             if test[0:3]=='cd ':
                """
                It seems that each exec_command is a seperate session so we have to run all commands combined
@@ -66,8 +72,7 @@ class SshXBlock(XBlock):
                http://stackoverflow.com/questions/8932862/how-do-i-change-directories-using-paramiko
                """
                stdin, stdout, stderr = ssh_connection.exec_command('cd ' + self.ssh_pwd+ ';' +'cd ' +test[3:]+";pwd | tr -d '\n'")   
-               self.ssh_pwd = stdout.readline()
-               print self.ssh_pwd               
+               self.ssh_pwd = stdout.readline()          
             stdin, stdout, stderr = ssh_connection.exec_command('cd ' + self.ssh_pwd+ ';' + data['cmd'])
             return json.dumps({'response': stdout.readlines()})
         except Exception:
@@ -101,7 +106,17 @@ class SshXBlock(XBlock):
             """"quit()"""
             return {'autho':"Not connected"}
         return {'autho': "Connected"}
-
+    
+    @XBlock.json_handler    
+    def getPort(self,data,suffix=''):
+        selected_host = data["selectedHost"]
+        x = 0
+        for i in self.ssh_hostnames:
+            if(i==selected_host):
+                return {"port":self.ssh_portList[x]}
+            x+=1    
+        return {"port":""}
+    
     def logout(self):
         self.channel.close()
         self.ssh_connection.close()
@@ -120,27 +135,32 @@ class SshXBlock(XBlock):
     @XBlock.json_handler
     def addHost(self,data, suffix=''):
         new_host = data['new_machine']
-        self.ssh_hostnames.append(new_host)   
+        new_port = data['new_port']
+        for i in self.ssh_hostnames:
+          if (i==new_host): 
+             return {"response":"false"}
+        self.ssh_hostnames.append(new_host)  
+        self.ssh_portList.append(new_port)        
         self.ssh_profiles.setdefault(new_host, [])
-        return {}
+        return {"response":"true"}
     
     """Studio view uses this to remove a host machine by id """
     @XBlock.json_handler    
     def removeHost(self,data,suffix=''):
-        print self.ssh_hostnames
         host_id = int(data['host_id'])
-        print "------------------------"
         removed_host = self.ssh_hostnames[host_id]
         self.ssh_hostnames.pop(host_id)
+        self.ssh_portList.pop(host_id)
         self.ssh_profiles.pop(removed_host)
+        
         return {}
     
         """Studio view uses this to get all host machines """
     @XBlock.json_handler    
     def getHost(self,data,suffix=''):
-        return json.dumps({'hosts': self.ssh_hostnames})
+        return json.dumps({'hosts': self.ssh_hostnames,'ports':self.ssh_portList})
     
-    
+        
     #----------------------studio View-Profiles--------------
     """Studio view uses this to add new profiles for a host""" 
     @XBlock.json_handler
@@ -148,8 +168,11 @@ class SshXBlock(XBlock):
         selected_host  = data['selected_host']
         new_user  = data['new_user']
         new_pass  = data['new_pass']
+        for i in self.ssh_profiles[selected_host]:
+            if (i[0]==new_user):
+                return{"response":"false"}            
         self.ssh_profiles[selected_host].append([new_user,new_pass])
-        return {} 
+        return {"response":"true"} 
     
     """Studio view uses this to remove a profile for a selected machine by id """
     @XBlock.json_handler 
