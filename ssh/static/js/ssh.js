@@ -17,9 +17,10 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
             termObj.echo(collided)                
     }
 
-    function done(result) {
-        alert(result.autho);
+    function done(result) {    
+       termObj.echo(result.autho);
     }
+
     
     var selectedHost = null
     var sshCmd = runtime.handlerUrl(element, 'process_command');
