@@ -10,7 +10,11 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
      * the output of a command passed to server.
      */
     function printCommandOutput(result) {
-        termObj.echo(JSON.parse(result)['response'])
+        var res = JSON.parse(result)['response'];
+        var collided=""
+        for(i in res)
+            collided+=res[i]
+            termObj.echo(collided)                
     }
 
     function done(result) {
