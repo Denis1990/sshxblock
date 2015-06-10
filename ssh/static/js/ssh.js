@@ -11,14 +11,21 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
      */
     function printCommandOutput(result) {
         var res = JSON.parse(result)['response'];
-        var collided=""
-        for(i in res)
-            collided+=res[i]
-            termObj.echo(collided)                
+        if((JSON.parse(result)['type'])==="cd")
+            termObj.set_prompt(res)
+        else if(res!="")
+        {
+            var collided=""
+            for(i in res)
+                collided+=res[i]
+            termObj.echo(collided)            
+        }            
     }
 
     function done(result) {    
        termObj.echo(result.autho);
+       if(result.autho==="Connected")
+        termObj.set_prompt(result.prefix);
     }
 
     
@@ -28,7 +35,6 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
     var getHostUrl = runtime.handlerUrl(element, 'getHost');
     var getPortUrl = runtime.handlerUrl(element, 'getPort');
     var getProfileUrl = runtime.handlerUrl(element, 'getProfile');
-    
     var termObj = $('#termDiv').terminal(
                 function(command, term) {
                  
@@ -49,7 +55,6 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
                 }
             }
         });
-       
        //Function to make ssh connect with ssh.py  authorize function
        $('#btncon', element).click(function(eventObject) {
            host = $("#hostTxt").val()

@@ -72,12 +72,15 @@ class SshXBlock(XBlock):
                http://stackoverflow.com/questions/8932862/how-do-i-change-directories-using-paramiko
                """
                stdin, stdout, stderr = ssh_connection.exec_command('cd ' + self.ssh_pwd+ ';' +'cd ' +test[3:]+";pwd | tr -d '\n'")   
-               self.ssh_pwd = stdout.readline()          
+               self.ssh_pwd = stdout.readline() 
+               return json.dumps({'type':"cd",'response': self.ssh_user+"@"+self.ssh_host+":"+self.ssh_pwd+"$>"})               
             stdin, stdout, stderr = ssh_connection.exec_command('cd ' + self.ssh_pwd+ ';' + data['cmd'])
-            return json.dumps({'response': stdout.readlines()})
+            return json.dumps({'type':"command",'response': stdout.readlines()})
         except Exception:
+            """
             print "Connection Failed"
             ssh_connection.close()
+            """
             return {'autho':"Not connected"}
         return {'response': None}
 
@@ -101,11 +104,13 @@ class SshXBlock(XBlock):
             stdin, stdout, stderr = ssh_connection.exec_command("cd ~ ;pwd | tr -d '\n'") 
             self.ssh_pwd = stdout.readline()       
         except paramiko.SSHException:
-            print "Connection Failed"
+            """
+            print "Connection Failed"         
             self.ssh_connection.close()
-            """"quit()"""
-            return {'autho':"Not connected"}
-        return {'autho': "Connected"}
+            quit()
+            """
+            return {'autho':"Connection failed..."}        
+        return {'autho': "Connected",'prefix':self.ssh_user+"@"+self.ssh_host+":"+self.ssh_pwd+"$>"}
     
     @XBlock.json_handler    
     def getPort(self,data,suffix=''):
