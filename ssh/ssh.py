@@ -74,6 +74,33 @@ class SshXBlock(XBlock):
                stdin, stdout, stderr = ssh_connection.exec_command('cd ' + self.ssh_pwd+ ';' +'cd ' +test[3:]+";pwd | tr -d '\n'")   
                self.ssh_pwd = stdout.readline() 
                return json.dumps({'type':"cd",'response': self.ssh_user+"@"+self.ssh_host+":"+self.ssh_pwd+"$>"})               
+            elif test[0:3]=="vi " or test[0:5]=="nano " or test[0:5]=="pico " or test[0:6]=="gedit "  or test[0:5]=="edit " :
+               if test[0:3]=="vi ":
+                   trimed = test[3:].strip()
+               elif test[0:5]=="nano " or test[0:5]=="pico " or test[0:5]=="edit " :
+                   trimed = test[5:].strip()
+               else : 
+                   trimed = test[6:].strip() 
+               if '/' in trimed  :
+                   print "\n Other Directory \n"
+                   cutted = trimed.split('/')
+                   lastPart = cutted[len(cutted)-1]
+                   if cutted[0]=='':
+                       cutted[0]=u'/'; 
+                   firstPart = ""
+                   for x in range(0, len(cutted)-1):
+                       if x!=0:
+                           firstPart += cutted[x]+"/"
+                       else:  
+                           firstPart += cutted[x]   
+                   stdin, stdout, stderr = ssh_connection.exec_command('cd ' + self.ssh_pwd+ ';find '+firstPart+' -name ' +'\''+lastPart+'\'' )                    
+               else : 
+                   stdin, stdout, stderr = ssh_connection.exec_command('cd ' + self.ssh_pwd+ ';find . -name ' +'\''+trimed+'\'' ) 
+               found = stdout.read();
+               if found!='' :
+                   stdin, stdout, stderr = ssh_connection.exec_command('cd ' + self.ssh_pwd+ '; cat ' + trimed  );   
+                   return json.dumps({'type':"editor",'response': stdout.readlines(),"title":trimed})                   
+               return {'response': None}
             stdin, stdout, stderr = ssh_connection.exec_command('cd ' + self.ssh_pwd+ ';' + data['cmd'])
             return json.dumps({'type':"command",'response': stdout.readlines()})
         except Exception:
@@ -109,8 +136,30 @@ class SshXBlock(XBlock):
             self.ssh_connection.close()
             quit()
             """
-            return {'autho':"Connection failed..."}        
+            return {'autho':"Connection failed..."}           
         return {'autho': "Connected",'prefix':self.ssh_user+"@"+self.ssh_host+":"+self.ssh_pwd+"$>"}
+
+
+    #function to edit texts         
+    @XBlock.json_handler    
+    def saveText(self,data,suffix=''):
+        ssh_connection = paramiko.SSHClient()
+        ssh_connection.set_missing_host_key_policy(paramiko.client.AutoAddPolicy())
+        try:
+            port_num = int(self.ssh_port)
+            ssh_connection.connect(hostname=self.ssh_host, port=port_num, username=self.ssh_user, password=self.ssh_pass)
+            title = str(data["title"])
+            newText = str(data["textArea"])       
+            stdin, stdout, stderr = ssh_connection.exec_command('cd ' + self.ssh_pwd+ '; echo \"'+newText+'\" > '+title);        
+            return {"response":""}
+        except Exception:
+             """
+             print "Connection Failed"
+             ssh_connection.close()
+             """
+             return {'response':"Not connected"}   
+       
+    
     
     @XBlock.json_handler    
     def getPort(self,data,suffix=''):

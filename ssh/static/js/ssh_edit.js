@@ -11,7 +11,7 @@ function SshEditXBlock(runtime, element) {
 function check(item){return  /^[ ]+/.test(item)}     
 //Regex to check if a number(valid port 22 or 4digit number)
 function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}           
-     
+      
 //============================HOST TABLE=============================
      
 //This function will be used each time the table is changed and on 
@@ -53,7 +53,7 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
       else
       getHost()     
     }
-    
+     
     //We created select buttons for each id on the host table this is the listener
       $("#hosts-table").on("click", "tr td:nth-child(4)", function(event){
          var tr = $(this).closest("tr")

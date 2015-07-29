@@ -1,6 +1,8 @@
 /* Javascript for SshXBlock. */
 function SshXBlock(runtime, element) {
     
+
+    
 //Regex to check if one or more spaces on start
 function checkSpaces(item){return  /^[ ]+/.test(item)}   
 //Regex to check if a number
@@ -9,16 +11,33 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
      * This function is responsible for printing
      * the output of a command passed to server.
      */
+
+/*
+  Function to execute the command
+  3 Types of commands
+  Normal command like ls
+  cd command in order to change directory
+  editor commands:words like nano,pico,vi,gedit,edit will fire a UI editor with a modal window in order to edit text
+*/     
     function printCommandOutput(result) {
         var res = JSON.parse(result)['response'];
-        if((JSON.parse(result)['type'])==="cd")
-            termObj.set_prompt(res)
-        else if(res!="")
+        if( (JSON.parse(result)['type'])==="cd" )
+            termObj.set_prompt(res)  ;    
+        else if(  (JSON.parse(result)['type'])==="editor" )
         {
-            var collided=""
+            $("#title").html(JSON.parse(result)['title']);
+            window.location.href = "#openModal";
+            var collided="";
             for(i in res)
-                collided+=res[i]
-            termObj.echo(collided)            
+                collided+=res[i];
+            $("#cat").val(collided) ; 
+        }        
+        else if(res!="")
+        { 
+            var collided="";
+            for(i in res)
+                collided+=res[i];
+            termObj.echo(collided);            
         }            
     }
 
@@ -27,7 +46,6 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
        if(result.autho==="Connected")
         termObj.set_prompt(result.prefix);
     }
-
     
     var selectedHost = null
     var sshCmd = runtime.handlerUrl(element, 'process_command');
@@ -35,6 +53,7 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
     var getHostUrl = runtime.handlerUrl(element, 'getHost');
     var getPortUrl = runtime.handlerUrl(element, 'getPort');
     var getProfileUrl = runtime.handlerUrl(element, 'getProfile');
+    var saveTextUrl = runtime.handlerUrl(element, 'saveText');
     var termObj = $('#termDiv').terminal(
                 function(command, term) {
                  
@@ -57,7 +76,7 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
         });
        //Function to make ssh connect with ssh.py  authorize function
        $('#btncon', element).click(function(eventObject) {
-           host = $("#hostTxt").val()
+           host = $("#hostTxt").val() 
            port = $("#portTxt").val()
            user = $("#usernameTxt").val()
            pass = $("#passwordTxt").val()
@@ -134,5 +153,49 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
                 success: updateUserList
             });
     });
+
+    
+    //4 modal window functions Save / Save as / Cancel buttons ands one button to clear the modal
+    $('#save-pushed', element).click(function(eventObject) {
+       if($("#title").html()!="" && $("#title").html()!=null)
+           $.ajax({
+                type: "POST", 
+                url: saveTextUrl,
+                data: JSON.stringify({"title":$("#title").html(),"textArea":$("#cat").val()}),
+                success: editorDone
+            });
+    });
+    
+    $('#save-as-pushed', element).click(function(eventObject) {
+          if($("#title").html()!="" && $("#title").html()!=null)
+            $.ajax({
+                type: "POST",
+                url: saveTextUrl,
+                data: JSON.stringify({"title":$("#new-title").val(),"textArea":$("#cat").val()}),
+                success: editorDone
+            });            
+    });
+     
+    $('#cancel-pushed', element).click(function(eventObject) {
+          window.location.href = "#close";
+          $("#title").html("");   
+          $("#new-title").val("");   
+          $("#cat").val("");
+    });
+    
+    $('#Xbutton', element).click(function(eventObject) {
+          window.location.href = "#close";
+          $("#title").html("");   
+          $("#new-title").val("");   
+          $("#cat").val("");
+    });
+    
+    function editorDone(result)
+    {
+     window.location.href = "#close";
+     $("#title").html("");   
+     $("#new-title").val("");   
+     $("#cat").val("");
+    }
     
 }

@@ -3,16 +3,16 @@
     <datalist id="data-ports"></datalist>
     <datalist id="data-users"></datalist>
     <table border="1" style="text-align:center;">
-    <thead>
+    <thead> 
         <tr>
         <th>Enter host</th>
-        <th>Enter port</th>   
+        <th>Enter port</th>    
         <th>Enter username</th>
         <th>Enter password</th>
         <th colspan="2">Actions</th>
         </tr>
     </thead>
-    <tr>
+    <tr> 
         <form id="clearForm">
         <td> <input name="hostTxt"  id="hostTxt" type="text" list="data-hosts"  autocomplete="on"/></td>
         <td><input name="portTxt" id="portTxt" type="text" list="data-ports"  autocomplete="on"/></td> 
@@ -25,4 +25,17 @@
     </table>
     <div id="termDiv" class="terminal" style="height: 400px;">
     </div>
+    <div id="openModal" class="modalDialog" wrap:off;>
+    <div> 
+		<a href="#close" title="Close" class="close" id="Xbutton">X</a>
+
+		<h2 id="title">Modal Box</h2>
+		<p><textarea id="cat"  rows="20" style="width:100%;height:100%;resize:vertical;" wrap='off'></textarea></p>
+        <center>
+        <input id="save-pushed" type="button" value="save"> <strong>or</strong>
+        <form action="#close" style=" display: inline-block;" ><input type="text" placeholder="New name" id="new-title" ><input id="save-as-pushed" type="submit" value="save as"></form>
+        <input id="cancel-pushed" name="cancel-pushed" type="button" value="cancel"">
+        </center>
+    </div>
+	</div>
 </div>
