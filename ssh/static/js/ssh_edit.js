@@ -159,7 +159,7 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
                     stringify({"new_user":new_user,"new_pass":new_pass,"selected_host":selectedHost}),
                     success: responseProfile
                 }); 
-                $("#new-username").val('')
+                $("#new-username").val('') 
                 $("#new-password").val('')
                 $("#new-password-2").val('')  
             }

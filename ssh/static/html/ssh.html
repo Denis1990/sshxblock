@@ -2,8 +2,9 @@
     <datalist id="data-hosts"></datalist>
     <datalist id="data-ports"></datalist>
     <datalist id="data-users"></datalist>
-    <table border="1" style="text-align:center;">
-    <thead> 
+    <center>
+    <table border="1" style="text-align:center;border-width:10px;border-color:#1F1F2E;">
+    <thead style="background-color:#1919D1;color:#FFFFFF;"> 
         <tr>
         <th>Enter host</th>
         <th>Enter port</th>    
@@ -12,6 +13,7 @@
         <th colspan="2">Actions</th>
         </tr>
     </thead>
+    <tbody style="background-color:#CCCCFF;">
     <tr> 
         <form id="clearForm">
         <td> <input name="hostTxt"  id="hostTxt" type="text" list="data-hosts"  autocomplete="on"/></td>
@@ -22,10 +24,12 @@
         <td><input type="reset" value="clear" ></td>
         </form>
     </tr>
+    </tbody>
     </table>
+    </center>
     <div id="termDiv" class="terminal" style="height: 400px;">
     </div>
-    <div id="openModal" class="modalDialog" wrap:off;>
+    <div id="openModal" class="modalDialog" wrap:off; >
     <div> 
 		<a href="#close" title="Close" class="close" id="Xbutton">X</a>
 

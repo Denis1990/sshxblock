@@ -64,6 +64,7 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
             greetings: 'Hello there. This is a terminal emulator!',
             keydown: function(e, term) {
                 // keycode 13 --> enter keystroke
+                // keycode 9  --> tab / Autocompletition
                 if (e.which === 13) {
                     $.ajax({
                         type: "POST",
@@ -72,6 +73,9 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
                         success: printCommandOutput
                     });
                 }
+                //else if (e.which === 9)
+                //{
+                //}
             }
         });
        //Function to make ssh connect with ssh.py  authorize function
@@ -181,7 +185,7 @@ function checkNumber(item){return  /^((22)|([1-9][0-9]{3,}))/.test(item)}
           $("#title").html("");   
           $("#new-title").val("");   
           $("#cat").val("");
-    });
+    }); 
     
     $('#Xbutton', element).click(function(eventObject) {
           window.location.href = "#close";

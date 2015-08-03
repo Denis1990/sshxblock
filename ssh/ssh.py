@@ -48,7 +48,7 @@ class SshXBlock(XBlock):
         frag.initialize_js('SshXBlock')
         """These values will be reseted on each visit """
         self.ssh_host = ''
-        self.ssh_user = ''
+        self.ssh_user = '' 
         self.ssh_pass = ''
         self.ssh_port = ''
         self.ssh_pwd = ''
