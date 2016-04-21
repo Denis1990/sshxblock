@@ -23,9 +23,9 @@ class SshXBlock(XBlock):
     ssh_pass = String(default='', scope=Scope.user_state, help="The password for ssh connection")
     ssh_port = Integer(default=22, scope=Scope.user_state, help="The port for ssh connection")
     ssh_pwd = String(default='~', scope=Scope.user_state, help="With cd command the path you were before is stored here")
-    ssh_hostnames = List(scope=Scope.user_state ,help="Editable property for studio version,defining machines to connect to.Field format :[hostname1,hostname2,...]")
-    ssh_portList = List(scope=Scope.user_state ,help="Editable property for studio version,defining port to connect to.Field format :[hostname1-Port,hostname2-port,...]")
-    ssh_profiles = Dict(scope=Scope.user_state ,help="Editable property for studio version,defining login profiles for machines.Field format :[Hostname1:[[user1,pass1],[user2,pass2]],Hostname2:[[user1,pass2],[user2,pass2]]]")
+    ssh_hostnames = List(scope=Scope.settings ,help="Editable property for studio version,defining machines to connect to.Field format :[hostname1,hostname2,...]")
+    ssh_portList = List(scope=Scope.settings ,help="Editable property for studio version,defining port to connect to.Field format :[hostname1-Port,hostname2-port,...]")
+    ssh_profiles = Dict(scope=Scope.settings ,help="Editable property for studio version,defining login profiles for machines.Field format :[Hostname1:[[user1,pass1],[user2,pass2]],Hostname2:[[user1,pass2],[user2,pass2]]]")
          
         
     def resource_string(self, path):
